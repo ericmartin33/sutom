@@ -33,7 +33,7 @@ class Keyboard extends StatelessWidget {
                 } else {
                   return _KeyboardButton(
                     letter: letter,
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.grey,
                     onTap: () => onKeyTap(letter),
                   );
                 }
