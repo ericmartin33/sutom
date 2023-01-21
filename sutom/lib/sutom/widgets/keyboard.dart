@@ -49,7 +49,7 @@ class _KeyboardButton extends StatelessWidget {
   const _KeyboardButton({
     super.key,
     this.height = 48,
-    this.width = 48,
+    this.width = 28,
     required this.letter,
     required this.onTap,
     required this.backgroundColor,

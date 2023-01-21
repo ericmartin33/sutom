@@ -48,6 +48,7 @@ class _SutomScreenState extends State<SutomScreen> {
       body: Column(
         children: [
           Board(board: _board),
+          Spacer(),
           Keyboard(
               onKeyTap: _onKeyTap,
               onDeleteTap: _onDeleteTap,
