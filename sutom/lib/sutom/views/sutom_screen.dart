@@ -129,7 +129,7 @@ class _SutomScreenState extends State<SutomScreen> {
           duration: const Duration(days: 1),
           backgroundColor: Colors.redAccent[200],
           content: Text(
-            'Perdu, la solution était : ${_solution.wordString}',
+            'Perdu! la solution était : ${_solution.wordString}',
             style: TextStyle(color: Colors.white),
           ),
           action: SnackBarAction(
@@ -139,8 +139,28 @@ class _SutomScreenState extends State<SutomScreen> {
           ),
         ),
       );
+    } else {
+      _gameStatus = GameStatus.playing;
     }
+    _currentTryIndex += 1;
   }
 
-  void _restart() {}
+  void _restart() {
+    setState(
+      () {
+        _gameStatus = GameStatus.playing;
+        _currentTryIndex = 0;
+        _board
+          ..clear()
+          ..addAll(
+            List.generate(6,
+                (_) => Word(letters: List.generate(5, (_) => Letter.empty()))),
+          );
+
+        _solution = Word.fromString(
+            fiveLetterWords[Random().nextInt(fiveLetterWords.length)]
+                .toUpperCase());
+      },
+    );
+  }
 }
