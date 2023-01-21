@@ -40,7 +40,7 @@ class Letter extends Equatable {
 
   Letter copyWith({String? val, LetterStatus? status}) {
     return Letter(
-      val: val ?? '',
+      val: val ?? this.val,
       status: status ?? LetterStatus.initial,
     );
   }

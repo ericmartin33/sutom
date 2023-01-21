@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:sutom/app/app_colors.dart';
 import 'package:sutom/sutom/sutom.dart';
 import 'package:sutom/sutom/widgets/keyboard.dart';
 import '../data/word_list.dart';
@@ -73,10 +74,73 @@ class _SutomScreenState extends State<SutomScreen> {
   }
 
   void _onEnterTap() {
-    if (_gameStatus == GameStatus.playing) {
-      setState(() {
-        //_currentTryWord?.removeLetter();
-      });
+    if (_gameStatus == GameStatus.playing &&
+        _currentTryWord != null &&
+        !_currentTryWord!.letters.contains(Letter.empty())) {
+      _gameStatus == GameStatus.playing;
+      for (var i = 0; i < _currentTryWord!.letters.length; i++) {
+        final _currentTryWordLetter = _currentTryWord!.letters[i];
+        final _currentSolutionLetter = _solution.letters[i];
+        setState(() {
+          if (_currentTryWordLetter == _currentSolutionLetter) {
+            _currentTryWord!.letters[i] = _currentTryWordLetter.copyWith(
+              status: LetterStatus.correct,
+            );
+          } else if (_solution.letters.contains(_currentTryWordLetter)) {
+            _currentTryWord!.letters[i] = _currentTryWordLetter.copyWith(
+              status: LetterStatus.inwWord,
+            );
+          } else {
+            _currentTryWord!.letters[i] = _currentTryWordLetter.copyWith(
+              status: LetterStatus.notInWord,
+            );
+          }
+        });
+      }
+      _checkIfWinOrLoss();
     }
   }
+
+  void _checkIfWinOrLoss() {
+    if (_currentTryWord!.wordString == _solution.wordString) {
+      _gameStatus = GameStatus.won;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          dismissDirection: DismissDirection.none,
+          duration: const Duration(days: 1),
+          backgroundColor: correctColor,
+          content: const Text(
+            'Gagné ! ',
+            style: TextStyle(color: Colors.white),
+          ),
+          action: SnackBarAction(
+            label: 'Rejouer',
+            onPressed: _restart,
+            textColor: Colors.white,
+          ),
+        ),
+      );
+    } else if (_currentTryIndex + 1 >= _board.length) {
+      _gameStatus = GameStatus.lost;
+      _gameStatus = GameStatus.won;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          dismissDirection: DismissDirection.none,
+          duration: const Duration(days: 1),
+          backgroundColor: Colors.redAccent[200],
+          content: Text(
+            'Perdu, la solution était : ${_solution.wordString}',
+            style: TextStyle(color: Colors.white),
+          ),
+          action: SnackBarAction(
+            label: 'Rejouer',
+            onPressed: _restart,
+            textColor: Colors.white,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _restart() {}
 }
