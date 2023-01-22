@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:sutom/app/app_colors.dart';
 import 'package:sutom/sutom/sutom.dart';
 import 'package:sutom/sutom/widgets/keyboard.dart';
-import '../data/word_list.dart';
+import '../data/mots_cinq_lettres.dart';
 
 enum GameStatus { playing, submitting, lost, won }
+
+final possibleWords =
+    fiveLettersWords.where((element) => element.length == 5).toList();
 
 class SutomScreen extends StatefulWidget {
   const SutomScreen({super.key});
@@ -22,11 +25,12 @@ class _SutomScreenState extends State<SutomScreen> {
 
   int _currentTryIndex = 0;
 
+  String? feedback;
   Word? get _currentTryWord =>
       _currentTryIndex < _board.length ? _board[_currentTryIndex] : null;
 
   Word _solution = Word.fromString(
-    fiveLetterWords[Random().nextInt(fiveLetterWords.length)].toUpperCase(),
+    possibleWords[Random().nextInt(possibleWords.length)].toUpperCase(),
   );
   @override
   void initState() {
@@ -58,7 +62,8 @@ class _SutomScreenState extends State<SutomScreen> {
       body: Column(
         children: [
           Board(board: _board),
-          Spacer(),
+          if (feedback != null) Text(feedback!),
+          const Spacer(),
           Keyboard(
               onKeyTap: _onKeyTap,
               onDeleteTap: _onDeleteTap,
@@ -71,6 +76,7 @@ class _SutomScreenState extends State<SutomScreen> {
   void _onKeyTap(String val) {
     if (_gameStatus == GameStatus.playing) {
       setState(() {
+        feedback = null;
         _currentTryWord?.addLetter(val);
       });
     }
@@ -79,12 +85,26 @@ class _SutomScreenState extends State<SutomScreen> {
   void _onDeleteTap() {
     if (_gameStatus == GameStatus.playing) {
       setState(() {
+        feedback = null;
         _currentTryWord?.removeLetter();
       });
     }
   }
 
   void _onEnterTap() {
+    setState(() {
+      feedback = null;
+    });
+
+    if (!possibleWords.contains(_currentTryWord?.wordString)) {
+      print(_currentTryWord?.wordString);
+
+      setState(() {
+        feedback = 'Ce mot n\'existe pas !';
+      });
+
+      return;
+    }
     if (_gameStatus == GameStatus.playing &&
         _currentTryWord != null &&
         !_currentTryWord!.letters.contains(Letter.empty())) {
@@ -153,6 +173,7 @@ class _SutomScreenState extends State<SutomScreen> {
     } else {
       _gameStatus = GameStatus.playing;
     }
+
     _currentTryIndex += 1;
     _board[_currentTryIndex].letters.first = _solution.letters.first;
   }
@@ -162,16 +183,22 @@ class _SutomScreenState extends State<SutomScreen> {
       () {
         _gameStatus = GameStatus.playing;
         _currentTryIndex = 0;
+        _solution = Word.fromString(
+            possibleWords[Random().nextInt(possibleWords.length)]
+                .toUpperCase());
         _board
           ..clear()
           ..addAll(
-            List.generate(6,
-                (_) => Word(letters: List.generate(5, (_) => Letter.empty()))),
+            List.generate(
+              6,
+              (line) => Word(
+                  letters: List.generate(
+                      5,
+                      (row) => (row == 0 && line == 0)
+                          ? _solution.letters.first
+                          : Letter.empty())),
+            ),
           );
-
-        _solution = Word.fromString(
-            fiveLetterWords[Random().nextInt(fiveLetterWords.length)]
-                .toUpperCase());
       },
     );
   }
