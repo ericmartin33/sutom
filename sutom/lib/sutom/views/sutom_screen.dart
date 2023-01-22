@@ -18,10 +18,7 @@ class SutomScreen extends StatefulWidget {
 class _SutomScreenState extends State<SutomScreen> {
   GameStatus _gameStatus = GameStatus.playing;
 
-  final List<Word> _board = List.generate(
-    6,
-    (_) => Word(letters: List.generate(5, (_) => Letter.empty())),
-  );
+  late final List<Word> _board;
 
   int _currentTryIndex = 0;
 
@@ -31,6 +28,19 @@ class _SutomScreenState extends State<SutomScreen> {
   Word _solution = Word.fromString(
     fiveLetterWords[Random().nextInt(fiveLetterWords.length)].toUpperCase(),
   );
+  @override
+  void initState() {
+    _board = List.generate(
+      6,
+      (line) => Word(
+          letters: List.generate(
+              5,
+              (row) => (row == 0 && line == 0)
+                  ? _solution.letters.first
+                  : Letter.empty())),
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +154,7 @@ class _SutomScreenState extends State<SutomScreen> {
       _gameStatus = GameStatus.playing;
     }
     _currentTryIndex += 1;
+    _board[_currentTryIndex].letters.first = _solution.letters.first;
   }
 
   void _restart() {
