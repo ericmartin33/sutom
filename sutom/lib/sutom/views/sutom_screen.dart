@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:sutom/app/app_colors.dart';
 import 'package:sutom/sutom/sutom.dart';
 import 'package:sutom/sutom/widgets/keyboard.dart';
-import '../data/mots_cinq_lettres.dart';
+import '../data/mots_potential.dart';
+import '../data/mots_attemptable.dart';
 
 enum GameStatus { playing, submitting, lost, won }
 
 final possibleWords =
-    fiveLettersWords.where((element) => element.length == 5).toList();
+    potentialWords.where((element) => element.length == 5).toList();
 
 class SutomScreen extends StatefulWidget {
   const SutomScreen({super.key});
@@ -19,6 +20,18 @@ class SutomScreen extends StatefulWidget {
 }
 
 class _SutomScreenState extends State<SutomScreen> {
+  String generateSolution(int length) {
+    print('ici');
+    int solLength = -1;
+    String sol = '';
+    while (solLength != length) {
+      sol = possibleWords[Random().nextInt(possibleWords.length)];
+      solLength = sol.length;
+    }
+    print(sol);
+    return sol.toUpperCase();
+  }
+
   GameStatus _gameStatus = GameStatus.playing;
 
   late final List<Word> _board;
@@ -31,11 +44,11 @@ class _SutomScreenState extends State<SutomScreen> {
   Word? get _currentTryWord =>
       _currentTryIndex < _board.length ? _board[_currentTryIndex] : null;
 
-  Word _solution = Word.fromString(
-    possibleWords[Random().nextInt(possibleWords.length)].toUpperCase(),
-  );
+  late Word _solution;
+  bool isDictLoading = false;
   @override
   void initState() {
+    _solution = Word.fromString(generateSolution(5));
     _board = List.generate(
       6,
       (line) => Word(
@@ -67,6 +80,7 @@ class _SutomScreenState extends State<SutomScreen> {
           Board(board: _board),
           if (feedback != null) Text(feedback!),
           const Spacer(),
+          if (isDictLoading) Center(child: CircularProgressIndicator()),
           Keyboard(
             onKeyTap: _onKeyTap,
             onDeleteTap: _onDeleteTap,
@@ -101,7 +115,7 @@ class _SutomScreenState extends State<SutomScreen> {
       feedback = null;
     });
 
-    if (!possibleWords.contains(_currentTryWord?.wordString)) {
+    if (!fiveLettersWordsReachable.contains(_currentTryWord?.wordString)) {
       setState(() {
         feedback = 'Ce mot n\'existe pas !';
       });
@@ -176,7 +190,7 @@ class _SutomScreenState extends State<SutomScreen> {
           backgroundColor: Colors.redAccent[200],
           content: Text(
             'Perdu! la solution était : ${_solution.wordString}',
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
           action: SnackBarAction(
             label: 'Rejouer',
@@ -198,9 +212,7 @@ class _SutomScreenState extends State<SutomScreen> {
       () {
         _gameStatus = GameStatus.playing;
         _currentTryIndex = 0;
-        _solution = Word.fromString(
-            possibleWords[Random().nextInt(possibleWords.length)]
-                .toUpperCase());
+        _solution = Word.fromString(generateSolution(5));
         _board
           ..clear()
           ..addAll(
