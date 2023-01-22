@@ -9,8 +9,7 @@ import '../data/mots_attemptable.dart';
 
 enum GameStatus { playing, submitting, lost, won }
 
-final possibleWords =
-    potentialWords.where((element) => element.length == 5).toList();
+late List<String> possibleWords;
 
 class SutomScreen extends StatefulWidget {
   const SutomScreen({super.key});
@@ -35,7 +34,7 @@ class _SutomScreenState extends State<SutomScreen> {
   GameStatus _gameStatus = GameStatus.playing;
 
   late final List<Word> _board;
-
+  int lengthWordUser = 6;
   int _currentTryIndex = 0;
 
   final Set<Letter> _keyboardLetters = {};
@@ -48,12 +47,15 @@ class _SutomScreenState extends State<SutomScreen> {
   bool isDictLoading = false;
   @override
   void initState() {
-    _solution = Word.fromString(generateSolution(5));
+    possibleWords = potentialWords
+        .where((element) => element.length == lengthWordUser)
+        .toList();
+    _solution = Word.fromString(generateSolution(lengthWordUser));
     _board = List.generate(
       6,
       (line) => Word(
           letters: List.generate(
-              5,
+              lengthWordUser,
               (row) => (row == 0 && line == 0)
                   ? _solution.letters.first
                   : Letter.empty())),
@@ -212,7 +214,7 @@ class _SutomScreenState extends State<SutomScreen> {
       () {
         _gameStatus = GameStatus.playing;
         _currentTryIndex = 0;
-        _solution = Word.fromString(generateSolution(5));
+        _solution = Word.fromString(generateSolution(lengthWordUser));
         _board
           ..clear()
           ..addAll(
@@ -220,7 +222,7 @@ class _SutomScreenState extends State<SutomScreen> {
               6,
               (line) => Word(
                   letters: List.generate(
-                      5,
+                      lengthWordUser,
                       (row) => (row == 0 && line == 0)
                           ? _solution.letters.first
                           : Letter.empty())),
