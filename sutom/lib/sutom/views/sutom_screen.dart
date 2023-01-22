@@ -25,6 +25,8 @@ class _SutomScreenState extends State<SutomScreen> {
 
   int _currentTryIndex = 0;
 
+  final Set<Letter> _keyboardLetters = {};
+
   String? feedback;
   Word? get _currentTryWord =>
       _currentTryIndex < _board.length ? _board[_currentTryIndex] : null;
@@ -43,6 +45,7 @@ class _SutomScreenState extends State<SutomScreen> {
                   ? _solution.letters.first
                   : Letter.empty())),
     );
+    feedback = _solution.wordString;
     super.initState();
   }
 
@@ -65,9 +68,11 @@ class _SutomScreenState extends State<SutomScreen> {
           if (feedback != null) Text(feedback!),
           const Spacer(),
           Keyboard(
-              onKeyTap: _onKeyTap,
-              onDeleteTap: _onDeleteTap,
-              onEnterTap: _onEnterTap)
+            onKeyTap: _onKeyTap,
+            onDeleteTap: _onDeleteTap,
+            onEnterTap: _onEnterTap,
+            letters: _keyboardLetters,
+          )
         ],
       ),
     );
@@ -97,8 +102,6 @@ class _SutomScreenState extends State<SutomScreen> {
     });
 
     if (!possibleWords.contains(_currentTryWord?.wordString)) {
-      print(_currentTryWord?.wordString);
-
       setState(() {
         feedback = 'Ce mot n\'existe pas !';
       });
@@ -127,7 +130,19 @@ class _SutomScreenState extends State<SutomScreen> {
             );
           }
         });
+
+        final letter = _keyboardLetters.firstWhere(
+          (element) => element.val == _currentTryWordLetter.val,
+          orElse: () => Letter.empty(),
+        );
+
+        if (letter.status != LetterStatus.correct) {
+          _keyboardLetters.removeWhere(
+              (element) => element.val == _currentTryWordLetter.val);
+          _keyboardLetters.add(_currentTryWord!.letters[i]);
+        }
       }
+
       _checkIfWinOrLoss();
     }
   }
@@ -199,6 +214,7 @@ class _SutomScreenState extends State<SutomScreen> {
                           : Letter.empty())),
             ),
           );
+        _keyboardLetters.clear();
       },
     );
   }

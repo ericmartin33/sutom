@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/letter_model.dart';
+
 const _azerty = [
   ['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M'],
@@ -11,11 +13,13 @@ class Keyboard extends StatelessWidget {
       {super.key,
       required this.onKeyTap,
       required this.onDeleteTap,
-      required this.onEnterTap});
+      required this.onEnterTap,
+      required this.letters});
 
   final void Function(String) onKeyTap;
   final VoidCallback onDeleteTap;
   final VoidCallback onEnterTap;
+  final Set<Letter> letters;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +35,15 @@ class Keyboard extends StatelessWidget {
                 } else if (letter == 'ENTER') {
                   return _KeyboardButton.enter(onTap: onEnterTap);
                 } else {
+                  final letterKey = letters.firstWhere(
+                      (element) => element.val == letter,
+                      orElse: (() => Letter.empty()));
+
                   return _KeyboardButton(
                     letter: letter,
-                    backgroundColor: Colors.grey,
+                    backgroundColor: letterKey != Letter.empty()
+                        ? letterKey.backgroundColor
+                        : Colors.grey,
                     onTap: () => onKeyTap(letter),
                   );
                 }
