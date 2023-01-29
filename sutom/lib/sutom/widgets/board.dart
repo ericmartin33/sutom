@@ -13,7 +13,10 @@ class Board extends StatelessWidget {
           .map((word) => Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: word.letters
-                    .map((letter) => BoardTile(letter: letter))
+                    .map((letter) => BoardTile(
+                          letter: letter,
+                          wordLength: word.letters.length + 1,
+                        ))
                     .toList(),
               ))
           .toList(),
